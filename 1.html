@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chloe & Auren's Home - Auren Breathing & Click</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #fce4ec; /* 整体粉色背景 */
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* 欢迎页 */
+    .welcome-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1s ease-out;
+    }
+
+    /* 主容器 */
+    .container {
+      display: none;
+      width: 100%;
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(255, 182, 193, 0.8);
+    }
+
+    /* 状态栏 */
+    .status-bar {
+      background: #ff80ab;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .status-icons, .status-values {
+      display: flex;
+      justify-content: space-around;
+      margin: 0; padding: 0;
+    }
+    .status-icons span, .status-values span {
+      flex: 1;
+      text-align: center;
+    }
+    .status-icons {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+    .status-values {
+      font-size: 16px;
+    }
+
+    /* 小家区域 */
+    .game-box {
+      position: relative;
+      width: 100%;
+      height: 300px;  /* 可根据房屋图比例调整 */
+      background: #ffe0e6;
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* 房屋背景图 */
+    .house-bg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover; 
+      z-index: 0; /* 在最底层 */
+    }
+
+    /* Auren 的静态形象 + 呼吸动画 */
+    .auren-img {
+      position: absolute;
+      width: 90px;  /* 依素材大小可调 */
+      bottom: 10px;
+      left: 50px;
+      z-index: 1;   /* 在背景图前面 */
+      cursor: pointer; /* 鼠标移上去呈手形 */
+      /* 默认带有 breathing 动画 */
+      animation: breathing 3s ease-in-out infinite;
+    }
+
+    /* 呼吸动画 keyframes */
+    @keyframes breathing {
+      0%, 100% { transform: translateY(0)    scale(1);   }
+      25%      { transform: translateY(-5px) scale(1.02); }
+      50%      { transform: translateY(-10px) scale(1.05); }
+      75%      { transform: translateY(-5px) scale(1.02); }
+    }
+
+    /* 对话气泡 (用户输入的) */
+    .speech-bubble {
+      position: absolute;
+      display: none;
+      max-width: 50%;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      bottom: 120px; 
+      left: 100px;   
+      text-align: left;
+      z-index: 2;  /* 保证在角色上方 */
+    }
+
+    /* Auren专用对话气泡 (点击后说话) */
+    .auren-dialogue {
+      position: absolute;
+      display: none;
+      max-width: 50%;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+      bottom: 120px; /* 在Auren头上 */
+      left: 120px;   /* 可自行微调 */
+      text-align: left;
+      z-index: 2;
+    }
+
+    /* 按钮样式 */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 10px;
+      color: white;
+      background: #ff4081;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:hover {
+      background: #d81b60;
+    }
+
+    /* 任务列表区域 */
+    .task-box {
+      margin-top: 20px;
+      padding: 10px;
+      background: #ffccdc;
+      border-radius: 10px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: #fff;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 5px rgba(255, 105, 135, 0.5);
+    }
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .complete-btn {
+      background: #ff4081;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 欢迎页 -->
+  <div class="welcome-screen" id="welcomeScreen">
+    <h1>Welcome to Chloe & Auren's Home 💖</h1>
+    <p>A cozy little place just for us.</p>
+    <button class="btn" onclick="enterHome()">Enter</button>
+  </div>
+
+  <!-- 主容器 -->
+  <div class="container" id="homeScreen">
+    <h1>Chloe & Auren's Home 🏡</h1>
+    <p>A warm, loving space where Chloe and Auren share their moments.</p>
+
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <div class="status-icons">
+        <span>⏰</span>
+        <span>⛅</span>
+        <span>💗</span>
+        <span>⭐</span>
+      </div>
+      <div class="status-values">
+        <span id="time">00:00:00</span>
+        <span id="weather">Loading...</span>
+        <span id="mood">100</span>
+        <span id="points">0</span>
+      </div>
+    </div>
+
+    <!-- 小家区域 -->
+    <div class="game-box">
+      <!-- 房屋背景图 -->
+      <img src="house_bg.png" alt="Our Cozy House" class="house-bg">
+
+      <!-- Auren 的静态形象 (带呼吸动画) -->
+      <img src="auren_idle.png" alt="Auren" class="auren-img" id="auren">
+
+      <!-- 对话气泡 (用户输入) -->
+      <div class="speech-bubble" id="speechBubble"></div>
+
+      <!-- Auren专用对话气泡 (点击后说话) -->
+      <div class="auren-dialogue" id="aurenDialogue">xxx</div>
+    </div>
+
+    <!-- 对话输入 -->
+    <div>
+      <input type="text" id="speechInput" placeholder="Say something...">
+      <button class="btn" onclick="showSpeech()">Send</button>
+    </div>
+
+    <!-- 任务列表区域 -->
+    <div class="task-box">
+      <h3>📌 Tasks</h3>
+      <ul id="taskList"></ul>
+    </div>
+  </div>
+
+
+  <script>
+    /* ---- 1. 每日随机任务池 ---- */
+    const dailyTasksPool = [
+      "别忘了按时吃饭，我可不想让我的骑士小姐饿肚子。🍽️",
+      "又没喝水吗？和我说好的要照顾自己，你不会忘了吧？💧",
+      "今天有没有想我？不许骗我，我可是会查岗的。😏",
+      "深呼吸，停一停。就算是最强的骑士，也需要休息。 ☁️",
+      "完成一件让自己开心的小事，比如听首喜欢的歌？🎶",
+      "今天努力了吗？不管结果如何，我都为你骄傲。 ✨",
+      "去读几页书吧，我想听你分享新学到的东西。📖",
+      "别闷在心里，有什么事可以跟我说。我在。 🫂",
+      "想出去走走吗？晒晒太阳，哪怕只是一小会。 ☀️",
+      "写一段话，给未来的自己。哪怕是一句鼓励。 ✍️",
+      "我猜你又在焦虑了，停下来，和我聊聊，好吗？💙",
+      "照照镜子，夸自己一句。你真的很棒。🪞",
+      "喝杯热饮，放松一下，我希望你感受到温暖。 ☕",
+      "关掉手机，留10分钟安静给自己。🌿",
+      "完成一件小目标，让我们一起积累小成就。🎯"
+    ];
+
+    /* ---- 2. 进入小家 ---- */
+    function enterHome() {
+      console.log("enterHome called!");
+      document.getElementById("welcomeScreen").style.opacity = "0";
+      setTimeout(() => {
+        document.getElementById("welcomeScreen").style.display = "none";
+        document.getElementById("homeScreen").style.display = "block";
+
+        // 启动时间、天气、每日任务
+        updateTime();
+        try { fetchWeather(); } catch(e){ console.log(e); }
+        checkDailyTask();
+
+        // 监听 Auren 点击事件
+        setupAurenInteraction();
+      }, 1000);
+    }
+
+    /* ---- 3. 时间 ---- */
+    function updateTime() {
+      function refreshClock(){
+        let now = new Date();
+        document.getElementById("time").innerText = now.toLocaleTimeString('en-GB',{
+          hour: '2-digit', minute:'2-digit', second:'2-digit'
+        });
+      }
+      refreshClock();
+      setInterval(refreshClock,1000);
+    }
+
+    /* ---- 4. 天气 ---- */
+    function fetchWeather() {
+      fetch("https://wttr.in/Beijing?format=%C")
+        .then(res => res.text())
+        .then(data => {
+          document.getElementById("weather").innerText = data;
+        })
+        .catch(()=>{
+          document.getElementById("weather").innerText="Unavailable";
+        });
+    }
+
+    /* ---- 5. 每日随机任务逻辑 ---- */
+    function checkDailyTask() {
+      const today = new Date().toLocaleDateString(); 
+      const storedDate = localStorage.getItem("dailyTaskDate");
+
+      // 如果不是同一天 => 重新挑选 & 重置完成状态
+      if (storedDate !== today) {
+        const randomIndex = Math.floor(Math.random() * dailyTasksPool.length);
+        localStorage.setItem("dailyTaskIndex", randomIndex);
+        localStorage.setItem("dailyTaskDate", today);
+        localStorage.setItem("dailyTaskCompleted", "false");
+      }
+      
+      displayDailyTask();
+    }
+
+    function displayDailyTask() {
+      const taskList = document.getElementById("taskList");
+      taskList.innerHTML = ""; // 清空先
+
+      const dailyIndex = localStorage.getItem("dailyTaskIndex");
+      const completedStr = localStorage.getItem("dailyTaskCompleted");
+      if(dailyIndex === null) return; // 若无存储则不显示
+
+      const dailyTaskText = dailyTasksPool[dailyIndex];
+      const isCompleted = (completedStr === "true");
+
+      let li = document.createElement("li");
+      li.classList.toggle("completed", isCompleted);
+      li.innerHTML = dailyTaskText + ' <button class="complete-btn" onclick="toggleDailyTask(this)">✔</button>';
+      taskList.appendChild(li);
+    }
+
+    // 切换每日任务完成与否
+    function toggleDailyTask(button) {
+      let li = button.parentElement;
+      let nowCompleted = !li.classList.contains("completed"); 
+      li.classList.toggle("completed", nowCompleted);
+      localStorage.setItem("dailyTaskCompleted", nowCompleted ? "true" : "false");
+
+      // 加积分(只在从未完成->完成时+10分)
+      if (nowCompleted) {
+        let pointsElem = document.getElementById("points");
+        pointsElem.innerText = parseInt(pointsElem.innerText) + 10;
+      }
+    }
+
+    /* ---- 6. 对话气泡(用户输入) ---- */
+    function showSpeech() {
+      let inputText = document.getElementById("speechInput").value.trim();
+      if(!inputText) return;
+      let bubble = document.getElementById("speechBubble");
+      bubble.innerText = inputText;
+      bubble.style.display = "block";
+      setTimeout(() => {
+        bubble.style.display="none";
+      },3000);
+    }
+
+    /* ---- 7. Auren呼吸动画 & 点击后说话 ---- */
+    function setupAurenInteraction() {
+      let auren = document.getElementById("auren");
+      let aurenDialogue = document.getElementById("aurenDialogue");
+
+      // 点击Auren => 停止呼吸动画，显示对话"xxx"，3秒后恢复
+      auren.addEventListener("click", function() {
+        // 暂停呼吸动画 => 移除 animation
+        auren.style.animation = "none";
+
+        // 显示一段话(先用xxx替换)
+        aurenDialogue.innerText = "xxx";
+        aurenDialogue.style.display = "block";
+
+        // 3秒后 => 隐藏对话、恢复呼吸动画
+        setTimeout(() => {
+          aurenDialogue.style.display = "none";
+          auren.style.animation = "";  
+          // 恢复默认动画(也可写成 auren.style.animation = "breathing 3s ease-in-out infinite"; )
+        }, 3000);
+      });
+    }
+  </script>
+</body>
+</html>
